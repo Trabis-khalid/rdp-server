@@ -1,4 +1,4 @@
-name: Ubuntu VNC
+name: Ubuntu VNC (ngrok)
 
 on: [workflow_dispatch]
 
@@ -6,17 +6,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VNC_PASSWORD: ${{ secrets.VNC_PASSWORD }}   # ⚠️ Définir ce secret dans GitHub Settings
-      NGROK_AUTH: ${{ secrets.NGROK_AUTH }}       # ⚠️ Ton token ngrok (Settings > Secrets)
+      VNC_PASSWORD: ${{ secrets.VNC_PASSWORD }}   # ⚠️ Définir dans GitHub Secrets (max 8 chars, ex: Pass1234)
+      NGROK_AUTH: ${{ secrets.NGROK_AUTH }}       # ⚠️ Ton token ngrok (dashboard.ngrok.com)
 
     steps:
       - name: Install Desktop Environment & VNC
         run: |
           sudo apt update
-          sudo apt install xfce4 xfce4-goodies tightvncserver git wget unzip -y
+          sudo apt install xfce4 xfce4-goodies tightvncserver git wget unzip jq -y
           
-          # Préparer dossier VNC
+          # Créer le dossier VNC
           mkdir -p ~/.vnc
+          
+          # Définir mot de passe VNC (max 8 chars)
           echo "$VNC_PASSWORD" | vncpasswd -f > ~/.vnc/passwd
           chmod 600 ~/.vnc/passwd
 
@@ -33,7 +35,7 @@ jobs:
         run: |
           git clone https://github.com/novnc/noVNC.git ~/noVNC
           git clone https://github.com/novnc/websockify ~/noVNC/utils/websockify
-          nohup python3 ~/noVNC/utils/novnc_proxy --vnc localhost:5901 --listen 6080 &
+          nohup ~/noVNC/utils/novnc_proxy --vnc localhost:5901 --listen 6080 &
 
       - name: Setup ngrok
         run: |
