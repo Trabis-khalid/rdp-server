@@ -39,7 +39,7 @@ jobs:
           wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip
           unzip ngrok-stable-linux-amd64.zip
           ./ngrok config add-authtoken $NGROK_AUTH
-          nohup ./ngrok http 6080 > ngrok.log &
+          nohup ./ngrok http 6080 --url=https://monvnc.ngrok-free.app &
           sleep 10
 
           # Afficher l'URL publique ngrok
