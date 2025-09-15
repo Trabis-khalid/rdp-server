@@ -5,18 +5,29 @@ on: [workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VNC_PASSWORD: ${{ secrets.VNC_PASSWORD }}   # ⚠️ Définir ce secret dans GitHub Settings
+
     steps:
       - name: Install Desktop Environment & VNC
         run: |
           sudo apt update
           sudo apt install xfce4 xfce4-goodies tightvncserver git -y
-          vncserver :1
-          vncserver -kill :1
+          
+          # Préparer dossier VNC
           mkdir -p ~/.vnc
+          
+          # Définir mot de passe VNC (max 8 caractères pour tightvncserver)
+          echo "$VNC_PASSWORD" | vncpasswd -f > ~/.vnc/passwd
+          chmod 600 ~/.vnc/passwd
+
+          # Configurer xstartup
           echo "#!/bin/bash
           xrdb $HOME/.Xresources
           startxfce4 &" > ~/.vnc/xstartup
           chmod +x ~/.vnc/xstartup
+
+          # Lancer serveur VNC
           vncserver :1 -geometry 1280x720 -depth 24
 
       - name: Setup noVNC Server
