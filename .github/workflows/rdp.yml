@@ -41,7 +41,7 @@ jobs:
         run: |
           wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip
           unzip ngrok-stable-linux-amd64.zip
-          ./ngrok authtoken $NGROK_AUTH
+          ./ngrok config add-authtoken $NGROK_AUTH
           nohup ./ngrok http 6080 > ngrok.log &
           sleep 10
           echo "------ NGROK PUBLIC URL ------"
