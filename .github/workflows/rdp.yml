@@ -1,13 +1,10 @@
-name: Ubuntu VNC (ngrok)
+name: Ubuntu VNC (ngrok - hardcoded)
 
 on: [workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      VNC_PASSWORD: ${{ secrets.VNC_PASSWORD }}   # ⚠️ Définir dans GitHub Secrets (max 8 chars, ex: Pass1234)
-      NGROK_AUTH: ${{ secrets.NGROK_AUTH }}       # ⚠️ Ton token ngrok (dashboard.ngrok.com)
 
     steps:
       - name: Install Desktop Environment & VNC
@@ -15,10 +12,12 @@ jobs:
           sudo apt update
           sudo apt install xfce4 xfce4-goodies tightvncserver git wget unzip jq -y
           
-          # Créer le dossier VNC
+          # Variables en clair (⚠️ pas sécurisé)
+          VNC_PASSWORD="WailZaz1980"         # max 8 caractères
+          NGROK_AUTH="32jEpd21ZqJpzN5xDGzzeFYkWZS_3858fFtyY71BayjFdiAkp"  # ton token ngrok
+
+          # Préparer VNC
           mkdir -p ~/.vnc
-          
-          # Définir mot de passe VNC (max 8 chars)
           echo "$VNC_PASSWORD" | vncpasswd -f > ~/.vnc/passwd
           chmod 600 ~/.vnc/passwd
 
@@ -31,18 +30,18 @@ jobs:
           # Lancer serveur VNC
           vncserver :1 -geometry 1280x720 -depth 24
 
-      - name: Setup noVNC Server
-        run: |
+          # Installer noVNC
           git clone https://github.com/novnc/noVNC.git ~/noVNC
           git clone https://github.com/novnc/websockify ~/noVNC/utils/websockify
           nohup ~/noVNC/utils/novnc_proxy --vnc localhost:5901 --listen 6080 &
 
-      - name: Setup ngrok
-        run: |
+          # Installer ngrok
           wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip
           unzip ngrok-stable-linux-amd64.zip
           ./ngrok config add-authtoken $NGROK_AUTH
           nohup ./ngrok http 6080 > ngrok.log &
           sleep 10
+
+          # Afficher l'URL publique ngrok
           echo "------ NGROK PUBLIC URL ------"
           curl --silent http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
